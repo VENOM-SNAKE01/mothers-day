@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>母亲节快乐 🌼</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: #fdf6f0;
+        }
+
+        /* ============ 信封层 ============ */
+        #envelope-layer {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            background: linear-gradient(135deg, #f5ebe0 0%, #fdf6f0 50%, #e8ddd3 100%);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #envelope-layer.opened {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        .envelope-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem;
+            color: #8b7355;
+            margin-bottom: 2rem;
+            letter-spacing: 0.3em;
+            opacity: 0;
+            animation: fadeInDown 1s ease 0.5s forwards;
+        }
+
+        .envelope-container {
+            width: 320px;
+            height: 220px;
+            position: relative;
+            cursor: pointer;
+            perspective: 800px;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1s forwards;
+        }
+
+        .envelope-body {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(145deg, #fff9f0, #f5ebe0);
+            border-radius: 8px;
+            box-shadow:
+                0 4px 20px rgba(139, 115, 85, 0.15),
+                0 1px 3px rgba(139, 115, 85, 0.1);
+            overflow: hidden;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(135deg, #f5ebe0, #e8ddd3);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            transform-origin: top center;
+            transition: transform 0.6s ease;
+            z-index: 2;
+        }
+
+        .envelope-container:hover .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-container.opening .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-inner-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(135deg, #fff9f0, #faf3eb);
+            clip-path: polygon(0 100%, 50% 0, 100% 100%);
+            z-index: 1;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            z-index: 3;
+        }
+
+        .seal-flower {
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .seal-petal {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(212, 180, 140, 0.6);
+            border-radius: 50% 50% 50% 0;
+            top: 50%;
+            left: 50%;
+        }
+
+        .seal-petal:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-12px); }
+        .seal-petal:nth-child(2) { transform: translate(-50%, -50%) rotate(72deg) translateY(-12px); }
+        .seal-petal:nth-child(3) { transform: translate(-50%, -50%) rotate(144deg) translateY(-12px); }
+        .seal-petal:nth-child(4) { transform: translate(-50%, -50%) rotate(216deg) translateY(-12px); }
+        .seal-petal:nth-child(5) { transform: translate(-50%, -50%) rotate(288deg) translateY(-12px); }
+
+        .seal-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #d4b48c;
+            border-radius: 50%;
+        }
+
+        .envelope-hint {
+            font-size: 0.9rem;
+            color: #b8a088;
+            margin-top: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.5s forwards, pulse 2s ease-in-out 2.5s infinite;
+            letter-spacing: 0.1em;
+        }
+
+        /* 信封装饰茉莉花 */
+        .envelope-deco-flower {
+            position: absolute;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .envelope-deco-flower.flower-1 {
+            top: 10%;
+            left: 8%;
+            font-size: 3rem;
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        .envelope-deco-flower.flower-2 {
+            bottom: 15%;
+            right: 10%;
+            font-size: 2.5rem;
+            animation: floatSlow 8s ease-in-out 1s infinite;
+        }
+
+        .envelope-deco-flower.flower-3 {
+            top: 20%;
+            right: 15%;
+            font-size: 2rem;
+            animation: floatSlow 7s ease-in-out 2s infinite;
+        }
+
+        /* ============ 正文层 ============ */
+        #content-layer {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease 0.5s;
+            background: linear-gradient(180deg, #fdf6f0 0%, #faf3eb 50%, #f5ebe0 100%);
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        #content-layer.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .content-card {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow:
+                0 8px 40px rgba(139, 115, 85, 0.1),
+                0 1px 3px rgba(139, 115, 85, 0.08);
+            border: 1px solid rgba(212, 180, 140, 0.2);
+            text-align: center;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: transform 0.8s ease 0.8s, opacity 0.8s ease 0.8s;
+        }
+
+        #content-layer.visible .content-card {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .jasmine-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        .main-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2.5rem;
+            color: #8b7355;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.15em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #b8a088;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4b48c, transparent);
+            margin: 0 auto 2rem;
+        }
+
+        .blessing-text {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: #6b5b4a;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .blessing-text p {
+            margin-bottom: 0.8rem;
+        }
+
+        .custom-blessing {
+            width: 100%;
+            min-height: 80px;
+            border: 1px solid rgba(212, 180, 140, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1rem;
+            color: #6b5b4a;
+            background: rgba(253, 246, 240, 0.5);
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .custom-blessing::placeholder {
+            color: #c4b5a5;
+        }
+
+        .custom-blessing:focus {
+            border-color: rgba(212, 180, 140, 0.6);
+            box-shadow: 0 0 0 3px rgba(212, 180, 140, 0.1);
+        }
+
+        .btn-send {
+            display: inline-block;
+            padding: 0.7rem 2rem;
+            background: linear-gradient(135deg, #d4b48c, #c4a47a);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 180, 140, 0.4);
+        }
+
+        .btn-send:active {
+            transform: translateY(0);
+        }
+
+        .sent-message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(253, 246, 240, 0.8);
+            border-radius: 12px;
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .sent-message.show {
+            display: block;
+        }
+
+        .sent-message p {
+            font-size: 1rem;
+            color: #6b5b4a;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        .footer-text {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #c4b5a5;
+            letter-spacing: 0.1em;
+        }
+
+        /* ============ 花瓣飘落 ============ */
+        .petal {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0;
+        }
+
+        .petal svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ============ 音乐控制 ============ */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(212, 180, 140, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .music-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .music-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #8b7355;
+        }
+
+        .music-btn.playing .music-icon-off {
+            display: none;
+        }
+
+        .music-btn .music-icon-on {
+            display: none;
+        }
+
+        .music-btn.playing .music-icon-on {
+            display: block;
+        }
+
+        /* ============ 动画 ============ */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        @keyframes petalFall {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) rotate(0deg) translateX(0);
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(360deg) translateX(80px);
+            }
+        }
+
+        @keyframes petalFall2 {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) rotate(0deg) translateX(0);
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(-270deg) translateX(-60px);
+            }
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 640px) {
+            .envelope-container {
+                width: 260px;
+                height: 180px;
+            }
+
+            .envelope-title {
+                font-size: 1.5rem;
+            }
+
+            .content-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .blessing-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 信封层 -->
+    <div id="envelope-layer">
+        <div class="envelope-deco-flower flower-1">🌼</div>
+        <div class="envelope-deco-flower flower-2">🤍</div>
+        <div class="envelope-deco-flower flower-3">✿</div>
+
+        <div class="envelope-title">致最爱的妈妈</div>
+
+        <div class="envelope-container" id="envelope" onclick="openEnvelope()">
+            <div class="envelope-body">
+                <div class="envelope-flap"></div>
+                <div class="envelope-inner-line"></div>
+                <div class="envelope-seal">
+                    <div class="seal-flower">
+                        <div class="seal-petal"></div>
+                        <div class="seal-petal"></div>
+                        <div class="seal-petal"></div>
+                        <div class="seal-petal"></div>
+                        <div class="seal-petal"></div>
+                        <div class="seal-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="envelope-hint">✨ 点击信封，打开祝福 ✨</div>
+    </div>
+
+    <!-- 正文层 -->
+    <div id="content-layer">
+        <div class="content-card">
+            <div class="jasmine-icon">🤍</div>
+            <h1 class="main-title">母亲节快乐</h1>
+            <p class="subtitle">Happy Mother's Day</p>
+            <div class="divider"></div>
+
+            <div class="blessing-text">
+                <p>亲爱的妈妈，</p>
+                <p>感谢您用温柔与坚强，</p>
+                <p>为我撑起一片晴空。</p>
+                <p>您的爱如茉莉花香，</p>
+                <p>淡雅却沁人心脾，</p>
+                <p>岁月流转，芬芳依旧。</p>
+                <p>愿您永远被爱包围，</p>
+                <p>健康快乐，笑颜如花。🌸</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <textarea class="custom-blessing" id="customBlessing" placeholder="在这里写下你想对妈妈说的话..."></textarea>
+            <br>
+            <button class="btn-send" onclick="sendBlessing()">送出祝福 💌</button>
+
+            <div class="sent-message" id="sentMessage">
+                <p id="sentText"></p>
+            </div>
+
+            <div class="footer-text">—— 永远爱您的孩子 ——</div>
+        </div>
+    </div>
+
+    <!-- 音乐控制按钮 -->
+    <button class="music-btn" id="musicBtn" onclick="toggleMusic()">
+        <svg class="music-icon-off" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <svg class="music-icon-on" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6zm-2 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+    </button>
+
+    <!-- 背景音乐 - 使用 Web Audio API 生成舒缓钢琴音 -->
+    <script>
+        // ============ 音乐系统 ============
+        let audioCtx = null;
+        let isPlaying = false;
+        let musicTimeout = null;
+        let currentNoteIndex = 0;
+
+        // 舒缓钢琴旋律 - 简化的《Kiss The Rain》风格
+        const melody = [
+            { note: 'E4', dur: 0.6 }, { note: 'G4', dur: 0.4 }, { note: 'A4', dur: 0.8 },
+            { note: 'G4', dur: 0.4 }, { note: 'E4', dur: 0.6 }, { note: 'D4', dur: 0.4 },
+            { note: 'C4', dur: 0.8 }, { note: 'D4', dur: 0.4 }, { note: 'E4', dur: 0.6 },
+            { note: 'G4', dur: 0.4 }, { note: 'A4', dur: 0.6 }, { note: 'B4', dur: 0.4 },
+            { note: 'C5', dur: 1.0 }, { note: 'B4', dur: 0.4 }, { note: 'A4', dur: 0.6 },
+            { note: 'G4', dur: 0.4 }, { note: 'E4', dur: 0.8 }, { note: 'D4', dur: 0.4 },
+            { note: 'E4', dur: 1.2 }, { note: null, dur: 0.4 },
+            { note: 'A4', dur: 0.6 }, { note: 'G4', dur: 0.4 }, { note: 'E4', dur: 0.6 },
+            { note: 'D4', dur: 0.4 }, { note: 'C4', dur: 0.8 }, { note: 'D4', dur: 0.4 },
+            { note: 'E4', dur: 0.6 }, { note: 'D4', dur: 0.4 }, { note: 'C4', dur: 0.8 },
+            { note: 'D4', dur: 0.4 }, { note: 'E4', dur: 1.2 }, { note: null, dur: 0.6 },
+        ];
+
+        const noteFreqs = {
+            'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+            'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25,
+        };
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playNote(freq, startTime, duration) {
+            if (!audioCtx || !freq) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            // 钢琴音色模拟
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            // 添加泛音
+            const osc2 = audioCtx.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(freq * 2, startTime);
+            const gain2 = audioCtx.createGain();
+            gain2.gain.setValueAtTime(0.15, startTime);
+
+            // 滤波器使声音更柔和
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(2000, startTime);
+
+            // ADSR 包络
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.15, startTime + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            gain2.gain.setValueAtTime(0, startTime);
+            gain2.gain.linearRampToValueAtTime(0.05, startTime + 0.05);
+            gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.7);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+            osc2.start(startTime);
+            osc2.stop(startTime + duration);
+        }
+
+        function playMelody() {
+            if (!isPlaying || !audioCtx) return;
+
+            let time = audioCtx.currentTime + 0.1;
+            const totalDuration = melody.reduce((sum, n) => sum + n.dur, 0);
+
+            melody.forEach((item) => {
+                if (item.note) {
+                    const freq = noteFreqs[item.note];
+                    playNote(freq, time, item.dur * 0.95);
+                }
+                time += item.dur;
+            });
+
+            // 循环播放
+            musicTimeout = setTimeout(() => {
+                if (isPlaying) playMelody();
+            }, totalDuration * 1000);
+        }
+
+        function toggleMusic() {
+            initAudio();
+            const btn = document.getElementById('musicBtn');
+
+            if (isPlaying) {
+                isPlaying = false;
+                btn.classList.remove('playing');
+                if (musicTimeout) clearTimeout(musicTimeout);
+            } else {
+                isPlaying = true;
+                btn.classList.add('playing');
+                playMelody();
+            }
+        }
+
+        // ============ 信封开启 ============
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            const envelopeLayer = document.getElementById('envelope-layer');
+            const contentLayer = document.getElementById('content-layer');
+
+            envelope.classList.add('opening');
+
+            // 自动播放音乐
+            setTimeout(() => {
+                initAudio();
+                if (!isPlaying) toggleMusic();
+            }, 300);
+
+            setTimeout(() => {
+                envelopeLayer.classList.add('opened');
+                contentLayer.classList.add('visible');
+                document.body.style.overflow = 'auto';
+                startPetals();
+            }, 800);
+        }
+
+        // ============ 花瓣飘落 ============
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+
+            const size = Math.random() * 15 + 10;
+            const startX = Math.random() * window.innerWidth;
+            const duration = Math.random() * 6 + 8;
+            const delay = Math.random() * 2;
+            const animName = Math.random() > 0.5 ? 'petalFall' : 'petalFall2';
+
+            // 茉莉花瓣 SVG
+            const hue = 30 + Math.random() * 20;
+            const sat = 20 + Math.random() * 30;
+            const light = 85 + Math.random() * 10;
+
+            petal.innerHTML = `
+                <svg viewBox="0 0 20 30" width="${size}" height="${size * 1.5}">
+                    <ellipse cx="10" cy="15" rx="6" ry="12"
+                        fill="hsla(${hue}, ${sat}%, ${light}%, 0.7)"
+                        transform="rotate(${Math.random() * 60 - 30}, 10, 15)"/>
+                </svg>
+            `;
+
+            petal.style.cssText = `
+                left: ${startX}px;
+                top: -30px;
+                width: ${size}px;
+                height: ${size * 1.5}px;
+                animation: ${animName} ${duration}s ease-in-out ${delay}s infinite;
+            `;
+
+            document.body.appendChild(petal);
+        }
+
+        function startPetals() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createPetal(), i * 300);
+            }
+        }
+
+        // 自动打开（如果 URL 带 #open 参数）
+        if (window.location.hash === '#open') {
+            setTimeout(openEnvelope, 500);
+        }
+
+        // ============ 送出祝福 ============
+        function sendBlessing() {
+            const input = document.getElementById('customBlessing');
+            const sentMsg = document.getElementById('sentMessage');
+            const sentText = document.getElementById('sentText');
+            const text = input.value.trim();
+
+            if (!text) {
+                input.style.borderColor = '#e8a0a0';
+                input.setAttribute('placeholder', '请写下你想对妈妈说的话 💝');
+                setTimeout(() => {
+                    input.style.borderColor = 'rgba(212, 180, 140, 0.3)';
+                    input.setAttribute('placeholder', '在这里写下你想对妈妈说的话...');
+                }, 2000);
+                return;
+            }
+
+            sentText.textContent = `"${text}"`;
+            sentMsg.classList.add('show');
+
+            // 按钮反馈
+            const btn = document.querySelector('.btn-send');
+            btn.textContent = '已送出 💕';
+            btn.style.background = 'linear-gradient(135deg, #c4a47a, #b8946a)';
+
+            // 额外花瓣庆祝
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => createPetal(), i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
